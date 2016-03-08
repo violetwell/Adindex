@@ -1,0 +1,84 @@
+LIBL64PATH = /usr/local/lib64
+LIBLPATH = /usr/local/lib
+LIB64PATH = /usr/lib64
+#LOG4CXX = /usr/local/log4cxx/include
+#LOG4CXX_DIR_LIB = /usr/local/log4cxx/lib
+LOG4CXX = /usr/local/include
+LOG4CXX_DIR_LIB = /usr/local/lib
+BOOSTPATH = /usr/include/boost
+THRIFTPATH = /usr/local/include/thrift
+
+SAMPLE_ROOT = $(PWD)
+
+UTILPATH = $(SAMPLE_ROOT)/util
+SEARCHPATH = $(SAMPLE_ROOT)/search
+INDEXPATH = $(SAMPLE_ROOT)/index
+ITPATH = $(SAMPLE_ROOT)/thrift/indexThrift
+ILTPATH = $(SAMPLE_ROOT)/thrift/indexlogThrift
+TINYXMLPATH = $(SAMPLE_ROOT)/index-lib/tinyxml
+LEVELDBPATH = $(SAMPLE_ROOT)/index-lib/leveldb/include
+RAPIDXML = $(SAMPLE_ROOT)/util/rapidxml
+
+INCLUDET = -I$(THRIFTPATH) \
+		-I$(LIB64PATH)\
+		-I$(BOOSTPATH) \
+		-I$(UTILPATH) \
+		-I$(SEARCHPATH) \
+		-I$(ITPATH) \
+		-I$(ILTPATH) \
+		-I$(INDEXPATH) \
+		-I$(TINYXMLPATH) \
+		-I$(LEVELDBPATH) \
+		-I$(RAPIDXML) \
+		-I$(LOG4CXX)
+
+CC=g++
+CC_FLAG=-O1 -DHAVE_NETINET_IN_H
+CC_DEBUG=-g
+CC_THRIFT=-DHAVE_NETINET_IN_H
+
+LIB_DIR = -lthrift -lpthread -lm -lcrypto -lstdc++ -llog4cxx
+
+search_server.o:search_server.cpp 
+	$(CC) $(CC_FLAG) $(INCLUDET) -L/usr/local/lib -c search_server.cpp -o search_server.o  
+search_client.o:search_client.cpp
+	$(CC) $(CC_FLAG) $(INCLUDET) -L/usr/local/lib -c search_client.cpp -o search_client.o  
+pthsearch_client.o:pthsearch_client.cpp
+	$(CC) $(CC_FLAG) $(INCLUDET) -L/usr/local/lib -c pthsearch_client.cpp -o pthsearch_client.o
+
+RPG=search_server
+OBJ=$(UTILPATH)/Schema.o $(UTILPATH)/SearchConfig.o $(SEARCHPATH)/MinHeap.o $(INDEXPATH)/fields.o $(INDEXPATH)/def.o $(UTILPATH)/loadconf.o $(INDEXPATH)/analyzer.o $(INDEXPATH)/docparser.o $(INDEXPATH)/inverted.o $(INDEXPATH)/merge.o $(UTILPATH)/utils.o $(UTILPATH)/pool.o $(INDEXPATH)/realtime.o $(UTILPATH)/Util.o $(SEARCHPATH)/IndexSearch.o $(SEARCHPATH)/SearchQuery.o $(SEARCHPATH)/term.o $(SEARCHPATH)/filter.o $(SEARCHPATH)/indexreader.o $(INDEXPATH)/handler.o $(SEARCHPATH)/score.o $(SEARCHPATH)/QueryScore1.o $(SEARCHPATH)/QueryScore2.o $(SEARCHPATH)/DnfScore.o $(SEARCHPATH)/brifereader.o $(SEARCHPATH)/searchstore.o $(INDEXPATH)/store.o $(SEARCHPATH)/Collector.o $(ITPATH)/index_types.cpp $(ITPATH)/index_constants.cpp $(ITPATH)/thriftSearch.cpp $(ILTPATH)/indexlog_constants.cpp $(ILTPATH)/indexlog_types.cpp $(ILTPATH)/InnerIndex.cpp search_server.o $(SAMPLE_ROOT)/index-lib/tinyxml/libtinyxml.a $(SAMPLE_ROOT)/index-lib/leveldb/libleveldb.a
+
+Index:
+	cd $(SAMPLE_ROOT)/index/ && make -f i.mk
+
+Search:
+	cd $(SAMPLE_ROOT)/search/ && make -f s.mk
+
+Util:
+	cd $(SAMPLE_ROOT)/util/ && make -f u.mk
+
+Serv:
+	cd $(SAMPLE_ROOT)
+
+
+$(RPG):$(OBJ)
+	$(CC) $(CC_FLAG) $(LIB_DIR) $(INCLUDET) -L$(LIBLPATH) -L$(LIBL64PATH) -L$(LOG4CXX_DIR_LIB) -o $(RPG) $(OBJ)
+search_client:search_client.o $(ITPATH)/thriftSearch.cpp $(ITPATH)/index_types.cpp $(ITPATH)/index_constants.cpp
+	$(CC) $(CC_FLAG) $(INCLUDET) -L$(LIBLPATH) -lthrift -o search_client $(ITPATH)/thriftSearch.cpp $(ITPATH)/index_types.cpp $(ITPATH)/index_constants.cpp  $(UTILPATH)/md5.cpp search_client.o
+pthsearch_client:pthsearch_client.o $(ITPATH)/thriftSearch.cpp $(ITPATH)/index_types.cpp $(ITPATH)/index_constants.cpp
+	$(CC) $(CC_FLAG) $(INCLUDET) -L$(LIBLPATH) -lthrift -o pthsearch_client $(ITPATH)/thriftSearch.cpp $(ITPATH)/index_types.cpp $(ITPATH)/index_constants.cpp pthsearch_client.o
+
+all:Index Search Util Serv search_server search_client pthsearch_client 
+	 
+clean:
+	@echo "Removing linked and compiled files......"
+	rm -f $(SAMPLE_ROOT)/search/*.o
+	rm -f $(SAMPLE_ROOT)/index/*.o
+	rm -f $(SAMPLE_ROOT)/util/*.o
+	rm -f *.o
+	rm -f search_server 
+	rm -f search_client
+	rm -f pthsearch_client
+
+.PHONY:clean all

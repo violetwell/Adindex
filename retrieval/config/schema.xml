@@ -1,0 +1,21 @@
+<?xml version="1.0" ?>
+<schema name="adindex" version="1.1">
+  <fields>
+    <field name="periods"    type="bin"  length="16" indexed="false"  stored="true"   filter="true"/>
+    <field name="id"         type="int"  length="4"  indexed="false"  stored="true"   filter="true"/> 
+    <field name="monitorkey" type="str"  length="25" indexed="false"  stored="true"   filter="true"/>
+    <field name="adsource"   type="str"  length="1"  indexed="true"   stored="true"   filter="true"/>
+    <field name="size"       type="int"  length="4"  indexed="true"   stored="true"   filter="false"/>
+    <field name="dnf"        type="dnf"  length="0"  indexed="true"   stored="false"  filter="false"/> 
+    <field name="tags"       type="tag"  length="0"  indexed="true"   stored="false"  filter="false"/>
+    <field name="adcode"     type="str"  length="0"  indexed="false"  stored="true"   filter="false"/>
+    <field name="adtype"     type="str"  length="0"  indexed="false"  stored="true"   filter="false"/>
+    <field name="bid"        type="int"  length="4"  indexed="false"  stored="true"   filter="false"/>
+    <field name="priority"   type="int"  length="4"  indexed="false"  stored="true"   filter="true"/>
+    <field name="adscore"    type="str"  length="0"  indexed="false"  stored="true"   filter="false"/>
+    <field name="freq"       type="str"  length="0"  indexed="false"  stored="true"   filter="false"/>
+    <field name="reserved"   type="str"  length="0"  indexed="false"  stored="true"   filter="false"/>
+    <field name="order_sn"   type="int"  length="4"  indexed="false"  stored="true"   filter="false"/>
+  </fields>
+  <uniqueKey key="id"/>
+</schema>
